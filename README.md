@@ -2,7 +2,9 @@
 
 This library is a utility toolkit for specific projects. It wraps and tailors
 the behavior of several 3rd-party Go libraries. The modifications are for
-specific use cases and not really intended for general consumption.
+specific use cases and not really intended for general consumption. That said,
+if one of these use cases overlaps with your project requirements feel free to
+fork and reuse.
 
 # Tools
 
