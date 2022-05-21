@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/brightpuddle/batteries/json"
+	"github.com/aci-vetr/bats/json"
 
 	"github.com/tidwall/gjson"
 )

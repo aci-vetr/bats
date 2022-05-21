@@ -1,4 +1,4 @@
-module github.com/brightpuddle/batteries
+module github.com/aci-vetr/bats
 
 go 1.18
 

@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/brightpuddle/batteries/logger"
+	"github.com/aci-vetr/bats/logger"
 
 	"github.com/goccy/go-reflect"
 
