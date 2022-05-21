@@ -59,7 +59,7 @@ func (w MultiLevelWriter) Write(p []byte) (int, error) {
 
 // WriteLevel writes log data for a given log level
 func (w MultiLevelWriter) WriteLevel(level zerolog.Level, p []byte) (int, error) {
-	if level >= zerolog.InfoLevel || level >= w.consoleLevel {
+	if level >= InfoLevel || level >= w.consoleLevel {
 		n, err := w.console.Write(p)
 		if err != nil {
 			return n, err
@@ -68,41 +68,55 @@ func (w MultiLevelWriter) WriteLevel(level zerolog.Level, p []byte) (int, error)
 	return w.file.Write(p)
 }
 
+const (
+	// DebugLevel is debug level logging
+	DebugLevel = iota + zerolog.DebugLevel
+	// InfoLevel is info level logging
+	InfoLevel
+	// WarnLevel is warning level logging
+	WarnLevel
+	// ErrorLevel is error level logging
+	ErrorLevel
+	// FatalLevel is fatal level logging
+	FatalLevel
+	// PanicLevel is panic level logging
+	PanicLevel
+)
+
 // Config is a logger configuration
 type Config struct {
-	Debug bool
+	Filename     string
+	ConsoleLevel zerolog.Level
 }
 
 // New creates a new multi-level logger
-func New(logFile string, cfgs ...Config) (*Logger, error) {
-	var cfg Config
-	if len(cfgs) > 0 {
-		cfg = cfgs[0]
+func New(cfg Config) (*Logger, error) {
+	consoleWriter := zerolog.ConsoleWriter{Out: os.Stderr, NoColor: windows}
+
+	log := zerolog.New(consoleWriter)
+
+	if cfg.Filename != "" {
+		file, err := os.Create(cfg.Filename)
+		if err != nil {
+			return nil, err
+		}
+		fileWriter := zerolog.ConsoleWriter{Out: file, NoColor: true}
+		writer := MultiLevelWriter{
+			file:         fileWriter,
+			console:      consoleWriter,
+			consoleLevel: cfg.ConsoleLevel,
+		}
+		log = zerolog.New(writer)
 	}
 
-	file, err := os.Create(logFile)
-	if err != nil {
-		return nil, err
-	}
-
-	consoleLevel := zerolog.WarnLevel
-	if cfg.Debug {
-		consoleLevel = zerolog.DebugLevel
-	}
-
-	writer := MultiLevelWriter{
-		file:         zerolog.ConsoleWriter{Out: file, NoColor: true},
-		console:      zerolog.ConsoleWriter{Out: os.Stderr, NoColor: windows},
-		consoleLevel: consoleLevel,
-	}
-	log := zerolog.New(writer).With().Timestamp().Logger()
+	log = log.With().Timestamp().Logger()
 	Set(&log)
-	return &log, err
+	return &log, nil
 }
 
 func init() {
 	// defaults
-	zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	zerolog.SetGlobalLevel(DebugLevel)
 	zerolog.ErrorStackMarshaler = pkgerrors.MarshalStack
 	zerolog.DurationFieldInteger = true
 }

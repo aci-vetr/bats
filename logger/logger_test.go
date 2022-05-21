@@ -11,7 +11,7 @@ import (
 func TestNew(t *testing.T) {
 	a := assert.New(t)
 
-	log, err := New("logger-test")
+	log, err := New(Config{Filename: "logger-test"})
 	a.NoError(err)
 	log.Info().Msg("info")
 	log.Debug().Msg("debug")
