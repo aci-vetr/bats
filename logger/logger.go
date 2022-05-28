@@ -122,7 +122,7 @@ func New(cfg Config) (*Logger, error) {
 		PartsExclude: []string{zerolog.TimestampFieldName},
 	}
 	fileLogger := zerolog.New(cfg.FileOut).With().Timestamp().Logger()
-	fileLogger.Level(cfg.FileLevel)
+	fileLogger = fileLogger.Level(cfg.FileLevel)
 	writer := MultiLevelWriter{
 		file:         fileLogger,
 		console:      consoleWriter,
