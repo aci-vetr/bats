@@ -68,6 +68,9 @@ func (w MultiLevelWriter) WriteLevel(level zerolog.Level, p []byte) (int, error)
 	return w.file.Write(p)
 }
 
+// Level is a logger level
+type Level = zerolog.Level
+
 const (
 	// DebugLevel is debug level logging
 	DebugLevel = iota + zerolog.DebugLevel
@@ -85,31 +88,47 @@ const (
 
 // Config is a logger configuration
 type Config struct {
+	ConsoleLevel Level
+	FileLevel    Level
 	Filename     string
-	ConsoleLevel zerolog.Level
+	FileOut      io.Writer
+	ConsoleOut   io.Writer
 }
 
 // New creates a new multi-level logger
 func New(cfg Config) (*Logger, error) {
-	consoleWriter := zerolog.ConsoleWriter{Out: os.Stderr, NoColor: windows}
-
-	log := zerolog.New(consoleWriter)
-
+	// If filename is specified, open file and assume file logging
 	if cfg.Filename != "" {
 		file, err := os.Create(cfg.Filename)
 		if err != nil {
 			return nil, err
 		}
-		fileWriter := zerolog.ConsoleWriter{Out: file, NoColor: true}
-		writer := MultiLevelWriter{
-			file:         fileWriter,
-			console:      consoleWriter,
-			consoleLevel: cfg.ConsoleLevel,
-		}
-		log = zerolog.New(writer)
+		cfg.FileOut = file
 	}
 
-	log = log.With().Timestamp().Logger()
+	// Only log to file if specified
+	if cfg.FileOut == nil {
+		cfg.FileOut = io.Discard
+	}
+	// Log to stderr unless otherwise specified
+	if cfg.ConsoleOut == nil {
+		cfg.ConsoleOut = os.Stderr
+	}
+
+	// Levels default to zero, i.e. debug
+	consoleWriter := zerolog.ConsoleWriter{
+		Out:          cfg.ConsoleOut,
+		NoColor:      windows,
+		PartsExclude: []string{zerolog.TimestampFieldName},
+	}
+	fileLogger := zerolog.New(cfg.FileOut).With().Timestamp().Logger()
+	fileLogger.Level(cfg.FileLevel)
+	writer := MultiLevelWriter{
+		file:         fileLogger,
+		console:      consoleWriter,
+		consoleLevel: cfg.ConsoleLevel,
+	}
+	log := zerolog.New(writer)
 	Set(&log)
 	return &log, nil
 }

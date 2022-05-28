@@ -19,7 +19,7 @@ func Middleware(verbose bool) fiber.Handler {
 
 		code := c.Response().StatusCode()
 
-		dumplogger := sublog.With().
+		log := sublog.With().
 			Int("status", code).
 			Str("method", c.Method()).
 			Str("path", c.Path()).
@@ -30,14 +30,14 @@ func Middleware(verbose bool) fiber.Handler {
 		switch {
 		case code >= 200 && code < 300:
 			if verbose {
-				dumplogger.Info().Msg(msg)
+				log.Info().Msg(msg)
 			} else {
-				dumplogger.Debug().Msg(msg)
+				log.Debug().Msg(msg)
 			}
 		case code >= 300 && code < 400:
-			dumplogger.Warn().Msg(msg)
+			log.Warn().Msg(msg)
 		default:
-			dumplogger.Error().Msg(msg)
+			log.Error().Msg(msg)
 		}
 		return chainErr
 	}
