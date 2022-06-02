@@ -127,7 +127,7 @@ func New(cfg Config) (*Logger, error) {
 		console:      consoleWriter,
 		consoleLevel: cfg.ConsoleLevel,
 	}
-	log := zerolog.New(writer)
+	log := zerolog.New(writer).With().Timestamp().Logger()
 	Set(&log)
 	return &log, nil
 }
