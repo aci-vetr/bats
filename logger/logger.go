@@ -117,9 +117,8 @@ func New(cfg Config) (*Logger, error) {
 
 	// Levels default to zero, i.e. debug
 	consoleWriter := zerolog.ConsoleWriter{
-		Out:          cfg.ConsoleOut,
-		NoColor:      windows,
-		PartsExclude: []string{zerolog.TimestampFieldName},
+		Out:     cfg.ConsoleOut,
+		NoColor: windows,
 	}
 	fileLogger := zerolog.New(cfg.FileOut).With().Timestamp().Logger()
 	fileLogger = fileLogger.Level(cfg.FileLevel)
