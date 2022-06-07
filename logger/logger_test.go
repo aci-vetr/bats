@@ -1,11 +1,13 @@
 package logger
 
 import (
+	"bytes"
 	"io"
 	"os"
 	"strings"
 	"testing"
 
+	"github.com/segmentio/encoding/json"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -46,4 +48,21 @@ func TestConsoleLevel(t *testing.T) {
 	})
 	log.Info().Msg("test")
 	a.NotContains(b.String(), "test")
+}
+
+func TestFileOutput(t *testing.T) {
+	a := assert.New(t)
+	var b bytes.Buffer
+	log, _ := New(Config{
+		FileOut:    &b,
+		ConsoleOut: io.Discard,
+	})
+	log.Info().
+		Str("one", "two").
+		Msg("test")
+	m := make(map[string]interface{})
+	a.NoError(json.Unmarshal(b.Bytes(), &m))
+	if a.Contains(m, "one") {
+		a.Equal(m["one"], "two")
+	}
 }

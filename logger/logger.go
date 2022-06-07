@@ -95,6 +95,10 @@ type Config struct {
 	ConsoleOut   io.Writer
 }
 
+type fileWriter struct {
+	io.Writer
+}
+
 // New creates a new multi-level logger
 func New(cfg Config) (*Logger, error) {
 	// If filename is specified, open file and assume file logging
@@ -120,10 +124,8 @@ func New(cfg Config) (*Logger, error) {
 		Out:     cfg.ConsoleOut,
 		NoColor: windows,
 	}
-	fileLogger := zerolog.New(cfg.FileOut).With().Timestamp().Logger()
-	fileLogger = fileLogger.Level(cfg.FileLevel)
 	writer := MultiLevelWriter{
-		file:         fileLogger,
+		file:         cfg.FileOut,
 		console:      consoleWriter,
 		consoleLevel: cfg.ConsoleLevel,
 	}
