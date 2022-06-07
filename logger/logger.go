@@ -59,7 +59,7 @@ func (w MultiLevelWriter) Write(p []byte) (int, error) {
 
 // WriteLevel writes log data for a given log level
 func (w MultiLevelWriter) WriteLevel(level zerolog.Level, p []byte) (int, error) {
-	if level >= InfoLevel || level >= w.consoleLevel {
+	if level >= w.consoleLevel {
 		n, err := w.console.Write(p)
 		if err != nil {
 			return n, err
